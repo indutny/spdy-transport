@@ -9,13 +9,15 @@ describe('SPDY Parser', function() {
   beforeEach(function(){
     var pool = spdy.compressionPool.create();
     parser = spdy.parser.create({});
-    var comp = pool.get();
+    var comp = pool.get("3.1");
     parser.setCompression(comp);
   });
 
  function pass(data, expected, done) {
     parser.skipPreface();
-    parser.write(new Buffer(data, 'hex'));
+    parser.write(new Buffer(data, 'hex'), function (err) { 
+      console.log("It should not err -> ", err)
+    });
 
     parser.once('data', function(frame) {
       console.log('FRAME: ', frame)
@@ -61,7 +63,6 @@ describe('SPDY Parser', function() {
       var frame = cvt + flags + len + sId + aToId + pri + slot + nVP;
       pass(nVP, {}, done)
     })
-  
   });
   
 
