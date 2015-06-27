@@ -60,8 +60,8 @@ describe('SPDY Parser', function() {
       var pri = '00'
       var slot = '00'
       var nVP = '00000000'
-      var frame = cvt + flags + len + sId + aToId + pri + slot + nVP;
-      pass(nVP, {}, done)
+      var framehex = cvt + flags + len + sId + aToId + pri + slot + nVP;
+      pass(framehex, {}, done)
     })
   });
   
