@@ -47,10 +47,21 @@ describe('SPDY Parser', function() {
     // 5. pass on FIN flag
     // 6. pass on UNIDIRECIONAL flag
    
-//  it('should parse general frame with http header', function(done) {
-    
-//  })
+    it('should parse general frame with http header', function(done) {
+      var cvt = '80030001';
+      var flags = '00';
+      var len = '000004';
+      var sId = '00000001'
+      var aToId = '00000000'
+      var pri = '00'
+      var slot = '00'
+      var nVP = '00000000'
+      var framehex = cvt + flags + len + sId + aToId + pri + slot + nVP;
+      pass(framehex, {}, done)
 
+    })
+
+    /*
     it('should parse general frame without http header', function(done) {
       var cvt = '80030001';
       var flags = '00';
@@ -63,6 +74,7 @@ describe('SPDY Parser', function() {
       var framehex = cvt + flags + len + sId + aToId + pri + slot + nVP;
       pass(framehex, {}, done)
     })
+    */
   });
   
 
