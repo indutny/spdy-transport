@@ -16,11 +16,12 @@ describe('SPDY Parser', function() {
  function pass(data, expected, done) {
     parser.skipPreface();
     parser.write(new Buffer(data, 'hex'), function (err) { 
-      console.log("It should not err -> ", err)
+      if (err) {
+        console.log("It should not err -> ", err)
+      } 
     });
 
     parser.once('data', function(frame) {
-      console.log('FRAME: ', frame)
       assert.deepEqual(frame, expected);
       assert.equal(parser.buffer.size, 0);
       done();
@@ -47,20 +48,26 @@ describe('SPDY Parser', function() {
     // 5. pass on FIN flag
     // 6. pass on UNIDIRECIONAL flag
    
-    it('should parse general frame with http header', function(done) {
-      var cvt = '80030001';
-      var flags = '00';
-      var len = '000004';
-      var sId = '00000001'
-      var aToId = '00000000'
-      var pri = '00'
-      var slot = '00'
-      var nVP = '00000000'
-      var framehex = cvt + flags + len + sId + aToId + pri + slot + nVP;
- 
-      var sniffed = 'c3842c78cb98e2809ee28886c39fc2acc382507ac2a542c2a75a77e2978a50e289a52a48c3b34dc3a5cb99cb87cb87'   
-      pass(sniffed, {}, done)
-
+    it('should parse SYN_STREAM frame with http header', function(done) {
+      var hexFrame =  '800300010000002c0000000100000000000078' +
+                      'f9e3c6a7c202e50e507ab442a45a77d7105006' +
+                      'b32a4804974d8cfa00000000ffff';
+      
+      pass(hexFrame, {
+        'fin': false,
+        'headers': {
+          ':method': 'GET',
+          ':path': '/',
+        },
+        'id': 1,
+        'path': '/',
+        'priority': {
+          'exclusive': false,
+          'parent': 0,
+          'weight': 1.
+        },
+        'type': 'SYN_STREAM'
+      }, done);
     })
 
     /*
