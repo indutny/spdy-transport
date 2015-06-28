@@ -57,7 +57,9 @@ describe('SPDY Parser', function() {
       var slot = '00'
       var nVP = '00000000'
       var framehex = cvt + flags + len + sId + aToId + pri + slot + nVP;
-      pass(framehex, {}, done)
+ 
+      var sniffed = 'c3842c78cb98e2809ee28886c39fc2acc382507ac2a542c2a75a77e2978a50e289a52a48c3b34dc3a5cb99cb87cb87'   
+      pass(sniffed, {}, done)
 
     })
 
