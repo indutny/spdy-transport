@@ -22,6 +22,7 @@ describe('SPDY Parser', function() {
     });
 
     parser.once('data', function(frame) {
+      // console.log('THE FRAME \n', frame)
       assert.deepEqual(frame, expected);
       assert.equal(parser.buffer.size, 0);
       done();
@@ -40,13 +41,13 @@ describe('SPDY Parser', function() {
     });
   }
   
-  describe('SYN_STREAM', function(){
-    // 1. pass with http header
-    // 2. pass without http header
-    // 3. fail on malformed
-    // 4. fail on stream ID 0
-    // 5. pass on FIN flag
-    // 6. pass on UNIDIRECIONAL flag
+  describe('SYN_STREAM', function() {
+    // [x] pass with http header
+    // [ ] pass without http header
+    // [ ] fail on malformed
+    // [ ] fail on stream ID 0
+    // [ ] pass on FIN flag
+    // [ ] pass on UNIDIRECIONAL flag
    
     it('should parse SYN_STREAM frame with http header', function(done) {
       var hexFrame =  '800300010000002c0000000100000000000078' +
@@ -85,7 +86,40 @@ describe('SPDY Parser', function() {
     })
     */
   });
-  
+ 
+  describe('SYN_REPLY', function() {
+    // [x] pass with regular SYN_REPLY 
 
+    it('should parse a SYN_REPLY frame', function(done) {
+      // SYN REPLY
+      // 80030002000000140000000178f9e3c6a7c202a6230600000000ffff
+
+      var hexFrame = '80030002000000140000000178f9e3c6a7c202a6230600000000ffff'
+
+      pass(hexFrame, {
+        "fin": false,
+        "headers": {},
+        "id": 1,
+        "path": undefined,
+        "priority": {
+          "exclusive": false,
+          "parent": 0,
+          "weight": 16,
+        },
+        "type": "SYN_REPLY"
+      }
+      , done);
+    })
+
+  })
+
+  describe('DATA_FRAME', function() {
+    // DATA Stream (from client)
+    // 000000010000001157726974696e6720746f2073747265616d0000000101000000
+
+    // Data Stream (from server)
+    // 000000010000001157726974696e6720746f2073747265616d0000000101000000
+
+  })
 
 })
