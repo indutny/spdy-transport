@@ -67,7 +67,7 @@ describe('SPDY Parser', function() {
           'parent': 0,
           'weight': 1.
         },
-        'type': 'SYN_STREAM'
+        'type': 'HEADERS' // by spec 'SYN_STREAM'
       }, done);
     })
 
@@ -106,7 +106,7 @@ describe('SPDY Parser', function() {
           "parent": 0,
           "weight": 16,
         },
-        "type": "SYN_REPLY"
+        "type": 'HEADERS' // by spec "SYN_REPLY"
       }
       , done);
     })
