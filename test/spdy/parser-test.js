@@ -44,7 +44,6 @@ describe('SPDY Parser', function() {
   describe('SYN_STREAM', function() {
     // [x] pass with http header
     // [ ] pass without http header
-    // [ ] fail on malformed
     // [ ] fail on stream ID 0
     // [ ] pass on FIN flag
     // [ ] pass on UNIDIRECIONAL flag
@@ -71,8 +70,7 @@ describe('SPDY Parser', function() {
       }, done);
     })
 
-    /*
-    it('should parse general frame without http header', function(done) {
+    /* it('should parse general frame without http header', function(done) {
       var cvt = '80030001';
       var flags = '00';
       var len = '000004';
@@ -83,17 +81,16 @@ describe('SPDY Parser', function() {
       var nVP = '00000000'
       var framehex = cvt + flags + len + sId + aToId + pri + slot + nVP;
       pass(framehex, {}, done)
-    })
-    */
+    }) */
   });
  
   describe('SYN_REPLY', function() {
-    // [x] pass with regular SYN_REPLY 
+    // [x] pass with frame without http headers
+    // [ ] pass with frame with http headers
+    // [ ] pass with frame with FLAG_FIN
+    // [ ] fail with frame with invalid flag
 
-    it('should parse a SYN_REPLY frame', function(done) {
-      // SYN REPLY
-      // 80030002000000140000000178f9e3c6a7c202a6230600000000ffff
-
+    it('should parse a frame without headers', function(done) {
       var hexFrame = '80030002000000140000000178f9e3c6a7c202a6230600000000ffff'
 
       pass(hexFrame, {
@@ -110,16 +107,38 @@ describe('SPDY Parser', function() {
       }
       , done);
     })
-
   })
 
   describe('DATA_FRAME', function() {
+    // [ ] pass with no flags
+    // [ ] pass with flag fin
+    // [ ] fail with non valid flag
+
     // DATA Stream (from client)
     // 000000010000001157726974696e6720746f2073747265616d0000000101000000
 
     // Data Stream (from server)
     // 000000010000001157726974696e6720746f2073747265616d0000000101000000
 
+  })
+
+  describe('RST_STREAM', function() {
+    // [ ] pass with frame without flags and status code PROTOCOL_ERROR
+    // [ ] pass with frame without flags and status code PROTOCOL_ERROR
+    // [ ] pass with frame without flags and status code PROTOCOL_ERROR
+    // [ ] pass with frame without flags and status code PROTOCOL_ERROR
+    // [ ] pass with frame without flags and status code PROTOCOL_ERROR
+    // [ ] pass with frame without flags and status code PROTOCOL_ERROR
+    // [ ] pass with frame without flags and status code PROTOCOL_ERROR
+    // [ ] pass with frame without flags and status code PROTOCOL_ERROR
+    // [ ] pass with frame without flags and status code PROTOCOL_ERROR
+    // [ ] pass with frame without flags and status code PROTOCOL_ERROR
+    // [ ] pass with frame without flags and status code PROTOCOL_ERROR
+    // [ ] fail with frame without flags and status code 0 (unvalid)
+    // [ ] fail with frame with flags (there should be none)
+
+    // RST_STREAM
+    // 800300010000002c0
   })
 
 })
