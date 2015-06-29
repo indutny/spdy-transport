@@ -107,7 +107,7 @@ describe('SPDY Parser', function() {
           parent: 0,
           weight: 16
         },
-        type: HEADERS // by spec SYN_REPLY
+        type: 'HEADERS' // by spec SYN_REPLY
       } , done);
     })
   })
@@ -123,7 +123,7 @@ describe('SPDY Parser', function() {
         data: new Buffer('57726974696e6720746f2073747265616d', 'hex'),
         fin: false,
         id: 1,
-        type: DATA
+        type: 'DATA'
       }, done);
     })
 
@@ -134,7 +134,7 @@ describe('SPDY Parser', function() {
         data: new Buffer('57726974696e6720746f2073747265616d', 'hex'),
         fin: true,
         id: 1,
-        type: DATA
+        type: 'DATA'
       }, done);
     })
 
