@@ -6,26 +6,26 @@ var spdy = transport.protocol.spdy;
 describe('SPDY Parser', function() {
   var parser;
 
-  beforeEach(function(){
+  beforeEach(function() {
     var pool = spdy.compressionPool.create();
     parser = spdy.parser.create({});
-    var comp = pool.get("3.1");
+    var comp = pool.get('3.1');
     parser.setCompression(comp);
   });
 
- function pass(data, expected, done) {
+  function pass(data, expected, done) {
     parser.skipPreface();
-    parser.write(new Buffer(data, 'hex'), function (err) { 
+    parser.write(new Buffer(data, 'hex'), function (err) {
       if (err) {
-        console.log("It should not err -> ", err)
-      } 
+        console.log('It should not err -> ', err)
+      }
     });
 
     parser.once('data', function(frame) {
       // console.log('THE FRAME \n', frame)
-      // if (frame.data) { 
+      // if (frame.data) {
       //  console.log('hey ', frame.data.toString('hex'))
-      //}
+      // }
       assert.deepEqual(frame, expected);
       assert.equal(parser.buffer.size, 0);
       done();
@@ -43,33 +43,34 @@ describe('SPDY Parser', function() {
       done();
     });
   }
-  
+
   describe('SYN_STREAM', function() {
     // [x] pass with http header
-    // [~] pass without http header (apparently it isn't supposed to - https://github.com/indutny/spdy-transport/issues/1#issuecomment-116108202
+    // [~] pass without http header (apparently it isn't supposed to -
+    // github.com/indutny/spdy-transport/issues/1#issuecomment-116108202
     // [ ] fail on stream ID 0
     // [ ] pass on FIN flag
     // [ ] pass on UNIDIRECIONAL flag
-   
+
     it('should parse frame with http header', function(done) {
       var hexFrame =  '800300010000002c0000000100000000000078' +
                       'f9e3c6a7c202e50e507ab442a45a77d7105006' +
                       'b32a4804974d8cfa00000000ffff';
-      
+
       pass(hexFrame, {
-        'fin': false,
-        'headers': {
+        fin: false,
+        headers: {
           ':method': 'GET',
-          ':path': '/',
+          ':path': '/'
         },
-        'id': 1,
-        'path': '/',
-        'priority': {
-          'exclusive': false,
-          'parent': 0,
-          'weight': 1.
+        id: 1,
+        path: '/',
+        priority: {
+          exclusive: false,
+          parent: 0,
+          weight: 1.
         },
-        'type': 'HEADERS' // by spec 'SYN_STREAM'
+        type: 'HEADERS' // by spec 'SYN_STREAM'
       }, done);
     })
 
@@ -86,7 +87,7 @@ describe('SPDY Parser', function() {
       pass(framehex, {}, done)
     }) */
   });
- 
+
   describe('SYN_REPLY', function() {
     // [x] pass with frame without http headers
     // [ ] pass with frame with http headers
@@ -97,18 +98,17 @@ describe('SPDY Parser', function() {
       var hexFrame = '80030002000000140000000178f9e3c6a7c202a6230600000000ffff'
 
       pass(hexFrame, {
-        "fin": false,
-        "headers": {},
-        "id": 1,
-        "path": undefined,
-        "priority": {
-          "exclusive": false,
-          "parent": 0,
-          "weight": 16,
+        fin: false,
+        headers: {},
+        id: 1,
+        path: undefined,
+        priority: {
+          exclusive: false,
+          parent: 0,
+          weight: 16
         },
-        "type": 'HEADERS' // by spec "SYN_REPLY"
-      }
-      , done);
+        type: HEADERS // by spec SYN_REPLY
+      } , done);
     })
   })
 
@@ -118,23 +118,23 @@ describe('SPDY Parser', function() {
 
     it('should parse frame with no flags', function(done) {
       var hexFrame = '000000010000001157726974696e6720746f2073747265616d'
-     
+
       pass(hexFrame, {
-        "data": new Buffer('57726974696e6720746f2073747265616d', 'hex'),
-        "fin": false,
-        "id": 1,
-        "type": "DATA",
+        data: new Buffer('57726974696e6720746f2073747265616d', 'hex'),
+        fin: false,
+        id: 1,
+        type: DATA
       }, done);
     })
 
     it('should parse frame with FLAG_FIN', function(done) {
       var hexFrame = '000000010100001157726974696e6720746f2073747265616d'
-     
+
       pass(hexFrame, {
-        "data": new Buffer('57726974696e6720746f2073747265616d', 'hex'),
-        "fin": true,
-        "id": 1,
-        "type": "DATA",
+        data: new Buffer('57726974696e6720746f2073747265616d', 'hex'),
+        fin: true,
+        id: 1,
+        type: DATA
       }, done);
     })
 
