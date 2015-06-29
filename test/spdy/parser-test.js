@@ -168,7 +168,6 @@ describe('SPDY Parser', function() {
       }, done);
     })
 
-
   })
 
 })
