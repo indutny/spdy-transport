@@ -153,9 +153,22 @@ describe('SPDY Parser', function() {
     // [ ] pass with frame without flags and status code FRAME_TOO_LARGE
     // [ ] fail with frame without flags and status code 0 (unvalid)
     // [ ] fail with frame with flags (there should be none)
+  })
 
-    // RST_STREAM
-    // 800300010000002c0
+
+  describe('SETTINGS', function() {
+    it('should parse frame', function(done) {
+      var hexFrame = '800300040000000c000000010100000700000100'
+
+      pass(hexFrame, {
+        settings: {
+          initial_window_size: 256
+        },
+        type: 'SETTINGS'
+      }, done);
+    })
+
+
   })
 
 })
