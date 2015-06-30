@@ -111,6 +111,10 @@ connection.on('frame', function (frame) {
 })
 ```
 
+## Implementation notes
+
+- spdy-transport always sends a SETTINGS frame as the first frame once the socket is open
+- the server requires a http `":method"` and `":path"` header. If they are not added on the client, `"GET"` and `"/"` are added by default
 
 ## Interop
 
