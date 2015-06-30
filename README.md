@@ -10,6 +10,8 @@ SPDY/HTTP2 generic transport implementation.
 
 ## Usage
 
+### server
+
 ```javascript
 var transport = require('spdy-transport');
 
@@ -17,15 +19,22 @@ var transport = require('spdy-transport');
 // of `net.createServer`'s connection handler.
 
 var server = transport.connection.create(socket, {
-  protocol: 'http2',
+  protocol: 'http2', // or 'spdy'
   isServer: true
 });
 
 server.on('stream', function(stream) {
   console.log(stream.method, stream.path, stream.headers);
+  
+  // necessary for the stream to be established in both ends
   stream.respond(200, {
     header: 'value'
   });
+
+  // response body
+  stream.write(<data>)
+
+  stream.end() // sends FLAG_FIN, setting the connection half open
 
   stream.on('readable', function() {
     var chunk = stream.read();
@@ -43,6 +52,71 @@ server.on('stream', function(stream) {
   // ...
 });
 ```
+
+### client
+
+```javascript
+var transport = require('spdy-transport')
+
+// NOTE: socket is some stream or net.Socket instance, may be an argument
+// of `net.createServer`'s connection handler.
+
+var client = transport.connection.create(socket, {
+  protocol: 'http2',
+  isServer: false
+})
+
+// optional for http2, however mandatory for spdy ([2, 3, 3.1])
+client.start(4)
+
+client.request({ 
+  method: 'GET',
+  host: 'localhost',
+  path: '/',
+  headers: {
+    a: 'b',
+    c: 'd'
+   }
+ }, function (err, stream) {
+  if (err) {
+    return console.log(err)
+  }
+
+  stream.on('response', function (code, headers) {
+    console.log(code, headers)
+   
+    // request body
+    stream.write(<data>)
+
+    // And other node.js Stream APIs
+    // ...
+  })
+
+  stream.on('readable', function () {
+    var chunk = stream.read()
+    if (!chunk) {
+      return
+    }
+    console.log(chunk.toString())
+  })
+})
+```
+
+### frame listener
+
+```javascript
+// either client or server
+connection.on('frame', function (frame) {
+  console.log(frame.type)
+})
+```
+
+
+## Interop
+
+`spdy-transport` is capable of interoping with other spdy framing layer implementations such as:
+
+- [spdystream](https://github.com/docker/spdystream), [example](/examples/spdystream-interop)
 
 ## LICENSE
 
