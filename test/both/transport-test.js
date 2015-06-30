@@ -125,6 +125,37 @@ describe('Transport', function() {
       });
     });
 
+    it('should send data after response', function(done) {
+      client.request({
+        method: 'GET',
+        path: '/hello-with-data',
+        headers: {
+          a: 'b',
+          c: 'd'
+        }
+      }, function(err, stream) {
+        assert(!err);
+
+        var gotResponse = false;
+        stream.on('response', function() {
+          gotResponse = true;
+        });
+
+        expectData(stream, 'ohai', function() {
+          assert(gotResponse);
+          done();
+        });
+      });
+
+      server.on('stream', function(stream) {
+        stream.respond(200, {
+          ohai: 'yes'
+        });
+
+        stream.end('ohai');
+      });
+    });
+
     it('should control the flow of the request', function(done) {
       var a = new Buffer(128);
       a.fill('a');
@@ -186,9 +217,7 @@ describe('Transport', function() {
       a.fill('a');
 
       client.request({
-        method: 'GET',
-        path: '/hello-split',
-        headers: { }
+        path: '/hello-split'
       }, function(err, stream) {
         assert(!err);
 
@@ -207,9 +236,7 @@ describe('Transport', function() {
 
     it('should emit trailing headers', function(done) {
       client.request({
-        method: 'GET',
-        path: '/hello-split',
-        headers: { }
+        path: '/hello-split'
       }, function(err, stream) {
         assert(!err);
 
@@ -227,6 +254,147 @@ describe('Transport', function() {
         stream.resume();
         stream.on('headers', function(headers) {
           assert.equal(headers.trailer, 'yes');
+          done();
+        });
+      });
+    });
+
+    it('should abort request', function(done) {
+      client.request({
+        path: '/hello-split'
+      }, function(err, stream) {
+        assert(!err);
+
+        stream.on('error', function(err) {
+          assert(err);
+          done();
+        });
+      });
+
+      server.on('stream', function(stream) {
+        stream.abort();
+      });
+    });
+
+    it('should abort request with pending write', function(done) {
+      client.request({
+        path: '/hello-split'
+      }, function(err, stream) {
+        assert(!err);
+
+        stream.on('data', function() {
+          assert(false, 'got data on aborted stream');
+        });
+
+        stream.on('error', function(err) {
+          assert(err);
+        });
+      });
+
+      server.on('stream', function(stream) {
+        stream.write('hello', function(err) {
+          assert(err);
+
+          // Make sure it will emit the errors
+          process.nextTick(done);
+        });
+        stream.on('error', function(err) {
+          assert(err);
+        });
+
+        stream.abort();
+      });
+    });
+
+    it('should abort request on closed stream', function(done) {
+      client.request({
+        path: '/hello-split'
+      }, function(err, stream) {
+        assert(!err);
+
+        stream.resume();
+        stream.end();
+      });
+
+      server.on('stream', function(stream) {
+        stream.respond(200, {});
+        stream.resume();
+        stream.end();
+
+        stream.once('close', function() {
+          stream.abort(done);
+        });
+      });
+    });
+
+    it('should create prioritized stream', function(done) {
+      client.request({
+        path: '/path',
+        priority: {
+          parent: 0,
+          exclusive: false,
+          weight: 42
+        }
+      }, function(err, stream) {
+        assert(!err);
+      });
+
+      server.on('stream', function(stream) {
+        var priority = stream._spdyState.priority;
+
+        // SPDY has just 3 bits of priority, can't fit 256 range into it
+        if (version >= 4)
+          assert.equal(priority.weight, 42);
+        else
+          assert.equal(priority.weight, 36);
+        done();
+      });
+    });
+
+    if (version >= 4) {
+      it('should update stream priority', function(done) {
+        client.request({
+          method: 'GET',
+          path: '/hello-split'
+        }, function(err, stream) {
+          assert(!err);
+
+          stream.on('priority', function(info) {
+            assert.equal(info.parent, 0);
+            assert.equal(info.exclusive, false);
+            assert.equal(info.weight, 42);
+            done();
+          });
+        });
+
+        server.on('stream', function(stream) {
+          stream.setPriority({ parent: 0, exclusive: false, weight: 42 });
+        });
+      });
+    }
+
+    it('should create PUSH_PROMISE', function(done) {
+      var parent = client.request({
+        path: '/parent'
+      }, function(err) {
+        assert(!err);
+        parent.pushPromise({
+          path: '/push',
+          priority: {
+            parent: 0,
+            exclusive: false,
+            weight: 42
+          }
+        }, function(err, stream) {
+          assert(!err);
+        });
+      });
+
+      server.on('stream', function(stream) {
+        assert.equal(stream.path, '/parent');
+
+        stream.on('pushPromise', function(push) {
+          assert.equal(push.path, '/push');
           done();
         });
       });

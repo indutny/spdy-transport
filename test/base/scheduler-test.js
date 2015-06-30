@@ -20,7 +20,7 @@ describe('Frame Scheduler', function() {
 
   function expect(string, done) {
     var actual = '';
-    var pending = scheduler.pending.count;
+    var pending = scheduler.count;
     var got = 0;
     scheduler.on('data', function(chunk) {
       actual += chunk;
@@ -71,6 +71,19 @@ describe('Frame Scheduler', function() {
     scheduler.write(chunk(2, 0, [ ' (yes)' ]));
 
     expect('hello world! (yes) hello world', done);
+  });
+
+  it('should respect priority window', function(done) {
+    scheduler.write(chunk(0, 0.5, [ 'a' ]));
+    scheduler.write(chunk(1, 0.4, [ 'b' ]));
+    scheduler.write(chunk(2, 0.3, [ 'c' ]));
+    scheduler.write(chunk(3, 0.2, [ 'd' ]));
+    scheduler.write(chunk(4, 0.1, [ 'f' ]));
+    scheduler.write(chunk(0, 0.5, [ 'A' ]));
+    scheduler.write(chunk(1, 0.4, [ 'B' ]));
+    scheduler.write(chunk(2, 0.3, [ 'C' ]));
+
+    expect('abcABCdf', done);
   });
 
   it('should not interleave sync data', function(done) {
