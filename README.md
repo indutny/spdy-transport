@@ -66,7 +66,7 @@ var client = transport.connection.create(socket, {
   isServer: false
 })
 
-// optional for http2, however mandatory for spdy ([2, 3, 3.1])
+// client.start(<version>), 4 for http2, [2,3,3.1] for spdy 2.0, 3.0 and 3.1 respectively
 client.start(4)
 
 client.request({ 
