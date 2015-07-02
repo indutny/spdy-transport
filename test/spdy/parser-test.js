@@ -35,6 +35,7 @@ describe('SPDY Parser', function() {
   function fail(data, code, re, done) {
     parser.skipPreface();
     parser.write(new Buffer(data, 'hex'), function(err) {
+      console.log('err - ', err) 
       assert(err);
       assert(err instanceof transport.protocol.base.utils.ProtocolError);
       assert.equal(err.code, spdy.constants.error[code]);
@@ -48,8 +49,8 @@ describe('SPDY Parser', function() {
     // [x] pass with http header
     // [~] pass without http header (apparently it isn't supposed to -
     // github.com/indutny/spdy-transport/issues/1#issuecomment-116108202
-    // [ ] fail on stream ID 0
-    // [ ] pass on FIN flag
+    // [~] fail on stream ID 0
+    // [X] pass on FIN flag
     // [ ] pass on UNIDIRECIONAL flag
 
     it('should parse frame with http header', function(done) {
@@ -74,18 +75,61 @@ describe('SPDY Parser', function() {
       }, done);
     })
 
-    /* it('should parse frame without http header', function(done) {
-      var cvt = '80030001';
-      var flags = '00';
-      var len = '000004';
-      var sId = '00000001'
-      var aToId = '00000000'
-      var pri = '00'
-      var slot = '00'
-      var nVP = '00000000'
-      var framehex = cvt + flags + len + sId + aToId + pri + slot + nVP;
-      pass(framehex, {}, done)
-    }) */
+    /*
+    it('should fail on stream ID 0', function(done) {
+      var hexFrame =  '800300010000002c0000000000000000000078' +
+                      'f9e3c6a7c202e50e507ab442a45a77d7105006' +
+                      'b32a4804974d8cfa00000000ffff';
+
+      fail(hexFrame, 'FRAME_SIZE_ERROR', /ACK.*non-zero/i, done);
+    });
+    */
+
+     it('should parse frame with http header and FIN flag', function(done) {
+      var hexFrame =  '800300010100002c0000000100000000000078' +
+                      'f9e3c6a7c202e50e507ab442a45a77d7105006' +
+                      'b32a4804974d8cfa00000000ffff';
+
+      pass(hexFrame, {
+        fin: true,
+        headers: {
+          ':method': 'GET',
+          ':path': '/'
+        },
+        id: 1,
+        path: '/',
+        priority: {
+          exclusive: false,
+          parent: 0,
+          weight: 1.
+        },
+        type: 'HEADERS' // by spec 'SYN_STREAM'
+      }, done);
+    })
+
+    it('should parse frame with http header and Unidirectional flag', function(done) {
+      var hexFrame =  '800300010200002c0000000100000000000078' +
+                      'f9e3c6a7c202e50e507ab442a45a77d7105006' +
+                      'b32a4804974d8cfa00000000ffff';
+
+      pass(hexFrame, {
+        fin: false,
+        headers: {
+          ':method': 'GET',
+          ':path': '/'
+        },
+        id: 1,
+        path: '/',
+        priority: {
+          exclusive: false,
+          parent: 0,
+          weight: 1.
+        },
+        type: 'HEADERS' // by spec 'SYN_STREAM'
+      }, done);
+    })
+
+
   });
 
   describe('SYN_REPLY', function() {
