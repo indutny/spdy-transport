@@ -326,7 +326,7 @@ describe('SPDY Parser', function() {
   })
 
   describe('PING', function() {
-    it('should parse frame', function(done) {
+    it('should parse ACK frame', function(done) {
       var hexFrame = '800300060000000400000001' // 0100000700000100'
 
       pass(hexFrame, {
@@ -336,6 +336,20 @@ describe('SPDY Parser', function() {
       }, done);
     })
   })
+
+  describe('PING', function() {
+    it('should parse not ACK frame', function(done) {
+      var hexFrame = '800300060000000400000002' // 0100000700000100'
+
+      pass(hexFrame, {
+        ack: false,
+        opaque: new Buffer('00000002', 'hex'),
+        type: 'PING'
+      }, done);
+    })
+  })
+
+
 
   describe('GOAWAY', function() {
     it('should parse frame with status code OK', function(done) {
