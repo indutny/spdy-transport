@@ -16,16 +16,11 @@ describe('SPDY Parser', function() {
   function pass(data, expected, done) {
     parser.skipPreface();
     parser.write(new Buffer(data, 'hex'), function (err) {
-      if (err) {
-        console.log('It should not err -> ', err)
-      }
+      if (err) { console.log('Should not err -> ', err) }
     });
 
     parser.once('data', function(frame) {
       // console.log('THE FRAME \n', frame)
-      // if (frame.data) {
-      //  console.log('hey ', frame.data.toString('hex'))
-      // }
       assert.deepEqual(frame, expected);
       assert.equal(parser.buffer.size, 0);
       done();
@@ -45,13 +40,6 @@ describe('SPDY Parser', function() {
   }
 
   describe('SYN_STREAM', function() {
-    // [x] pass with http header
-    // [~] pass without http header (apparently it isn't supposed to -
-    // github.com/indutny/spdy-transport/issues/1#issuecomment-116108202
-    // [~] fail on stream ID 0
-    // [X] pass on FIN flag
-    // [ ] pass on UNIDIRECIONAL flag
-
     it('should parse frame with http header', function(done) {
       var hexFrame =  '800300010000002c0000000100000000000078' +
                       'f9e3c6a7c202e50e507ab442a45a77d7105006' +
@@ -129,15 +117,9 @@ describe('SPDY Parser', function() {
       }, done);
     })
 
-
   });
 
   describe('SYN_REPLY', function() {
-    // [x] pass with frame without http headers
-    // [ ] pass with frame with http headers
-    // [ ] pass with frame with FLAG_FIN
-    // [ ] fail with frame with invalid flag
-
     it('should parse a frame without headers', function(done) {
       var hexFrame = '80030002000000140000000178f9e3c6a7c202a6230600000000ffff'
 
@@ -155,12 +137,52 @@ describe('SPDY Parser', function() {
         writable: true
       } , done);
     })
+
+    it('should parse a frame with headers', function(done) {
+      var hexFrame = '8003000200000057000000013830e3c6a7c2004300bcff' +
+          '00000003000000057468657265000000057468657265000000073a737' +
+          '46174757300000006323030204f4b000000083a76657273696f6e0000' +
+          '0008485454502f312e31000000ffff'
+
+      pass(hexFrame, {
+        fin: false,
+        headers: {
+         ":status": 200,
+          there: "there"
+        },
+        id: 1,
+        path: undefined,
+        priority: {
+          exclusive: false,
+          parent: 0,
+          weight: 16
+        },
+        type: 'HEADERS', // by spec SYN_REPLY
+        writable: true
+      } , done);
+    })
+
+    it('should parse frame with FIN_FLAG', function(done) {
+      var hexFrame = '80030002010000140000000178f9e3c6a7c202a6230600000000ffff'
+
+      pass(hexFrame, {
+        fin: true,
+        headers: {},
+        id: 1,
+        path: undefined,
+        priority: {
+          exclusive: false,
+          parent: 0,
+          weight: 16
+        },
+        type: 'HEADERS', // by spec SYN_REPLY
+        writable: true
+      } , done);
+    })
+
   })
 
   describe('DATA_FRAME', function() {
-    // [x] pass with no flags
-    // [x] pass with flag fin
-
     it('should parse frame with no flags', function(done) {
       var hexFrame = '000000010000001157726974696e6720746f2073747265616d'
 
@@ -212,7 +234,25 @@ describe('SPDY Parser', function() {
         type: 'SETTINGS'
       }, done);
     })
+  })
 
+  describe('PING', function() {
+    // [ ] 
+  })
+
+  describe('GOAWAY', function() {
+    // [ ] 
+
+  })
+
+  describe('HEADERS', function() {
+    // [ ] 
+
+  })
+
+  describe('WINDOW_UPDATE', function () {
+    // [ ] 
+ 
   })
 
 })
