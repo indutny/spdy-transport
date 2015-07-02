@@ -299,9 +299,9 @@ describe('SPDY Parser', function() {
     });
 
     it('should parse frame with status code FRAME_TOO_LARGE', function(done) {
-      var hexFrame = '8003000300000008000000010000000b';
+      var hexframe = '8003000300000008000000010000000b';
 
-      pass(hexFrame, {
+      pass(hexframe, {
         code: "FRAME_TOO_LARGE",
         id: 1,
         type: 'RST' // RST_STREAM by spec
@@ -338,8 +338,35 @@ describe('SPDY Parser', function() {
   })
 
   describe('GOAWAY', function() {
-    // [ ]
+    it('should parse frame with status code OK', function(done) {
+      var hexframe = '80030007000000080000000100000000';
 
+      pass(hexframe, {
+        code: "OK",
+        lastId: 1,
+        type: 'GOAWAY'
+      }, done);
+    });
+
+    it('should parse frame with status code PROTOCOL_ERROR', function(done) {
+      var hexframe = '80030007000000080000000100000001';
+
+      pass(hexframe, {
+        code: "PROTOCOL_ERROR",
+        lastId: 1,
+        type: 'GOAWAY'
+      }, done);
+    });
+
+    it('should parse frame with status code INTERNAL_ERROR', function(done) {
+      var hexframe = '80030007000000080000000100000002';
+
+      pass(hexframe, {
+        code: "INTERNAL_ERROR",
+        lastId: 1,
+        type: 'GOAWAY'
+      }, done);
+    });
   })
 
   describe('HEADERS', function() {
