@@ -327,7 +327,7 @@ describe('SPDY Parser', function() {
 
   describe('PING', function() {
     it('should parse ACK frame', function(done) {
-      var hexFrame = '800300060000000400000001' // 0100000700000100'
+      var hexFrame = '800300060000000400000001'
 
       pass(hexFrame, {
         ack: true,
@@ -339,7 +339,7 @@ describe('SPDY Parser', function() {
 
   describe('PING', function() {
     it('should parse not ACK frame', function(done) {
-      var hexFrame = '800300060000000400000002' // 0100000700000100'
+      var hexFrame = '800300060000000400000002'
 
       pass(hexFrame, {
         ack: false,
