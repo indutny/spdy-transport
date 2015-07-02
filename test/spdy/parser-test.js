@@ -369,10 +369,17 @@ describe('SPDY Parser', function() {
     });
   });
 
+  /*
   describe('HEADERS', function() {
-    // [ ]
+    it('should parse frame', function(done) {
+      var hexframe = '800300080000002500000001001700e8ff00000001000000046d6f72650000000768656164657273000000ffff'
 
-  })
+      pass(hexframe, {
+        type: 'HEADERS'
+      }, done);
+    });
+  });
+  */
 
   describe('WINDOW_UPDATE', function () {
     it('should parse frame', function(done) {
@@ -385,6 +392,6 @@ describe('SPDY Parser', function() {
       }, done);
     });
 
-  })
+  });
 
-})
+});
