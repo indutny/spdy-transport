@@ -326,21 +326,29 @@ describe('SPDY Parser', function() {
   })
 
   describe('PING', function() {
-    // [ ] 
+    it('should parse frame', function(done) {
+      var hexFrame = '800300060000000400000001' // 0100000700000100'
+
+      pass(hexFrame, {
+        ack: true,
+        opaque: new Buffer('00000001', 'hex'),
+        type: 'PING'
+      }, done);
+    })
   })
 
   describe('GOAWAY', function() {
-    // [ ] 
+    // [ ]
 
   })
 
   describe('HEADERS', function() {
-    // [ ] 
+    // [ ]
 
   })
 
   describe('WINDOW_UPDATE', function () {
-    // [ ] 
+    // [ ]
  
   })
 
