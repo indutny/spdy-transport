@@ -5,6 +5,7 @@ var streamPair = require('stream-pair');
 var transport = require('../../');
 
 describe('Transport', function() {
+  var pair = null;
   var server = null;
   var client = null;
 
@@ -23,7 +24,7 @@ describe('Transport', function() {
   function protocol(name, version, body) {
     describe(name + ' (v' + version + ')', function() {
       beforeEach(function() {
-        var pair = streamPair.create();
+        pair = streamPair.create();
 
         server = transport.connection.create(pair, {
           protocol: name,
@@ -122,6 +123,101 @@ describe('Transport', function() {
         });
 
         expectData(stream, 'hello world', done);
+      });
+    });
+
+    it('should send data after response', function(done) {
+      client.request({
+        method: 'GET',
+        path: '/hello-with-data',
+        headers: {
+          a: 'b',
+          c: 'd'
+        }
+      }, function(err, stream) {
+        assert(!err);
+
+        var gotResponse = false;
+        stream.on('response', function() {
+          gotResponse = true;
+        });
+
+        expectData(stream, 'ohai', function() {
+          assert(gotResponse);
+          done();
+        });
+      });
+
+      server.on('stream', function(stream) {
+        stream.respond(200, {
+          ohai: 'yes'
+        });
+
+        stream.end('ohai');
+      });
+    });
+
+    it('should fail to send data after FIN', function(done) {
+      client.request({
+        method: 'GET',
+        path: '/hello-with-data',
+        headers: {
+          a: 'b',
+          c: 'd'
+        }
+      }, function(err, stream) {
+        assert(!err);
+
+        stream.write('hello ');
+        stream.end('world', function() {
+          stream._spdyState.framer.dataFrame({
+            id: stream.id,
+            priority: 0,
+            fin: false,
+            data: new Buffer('no way')
+          });
+        });
+
+        stream.on('error', next);
+      });
+
+      server.on('stream', function(stream) {
+        stream.respond(200, {
+          ohai: 'yes'
+        });
+
+        expectData(stream, 'hello world', next);
+      });
+
+      var waiting = 2;
+      function next() {
+        if (--waiting === 0)
+          return done();
+      }
+    });
+
+    it('should truncate data to fit maxChunk', function(done) {
+      var big = new Buffer(1024);
+      big.fill('a');
+
+      client.request({
+        path: '/hello-with-data'
+      }, function(err, stream) {
+        assert(!err);
+
+        stream.setMaxChunk(10);
+        stream.end(big);
+      });
+
+      server.on('stream', function(stream) {
+        stream.respond(200, {
+          ohai: 'yes'
+        });
+
+        stream.on('data', function(chunk) {
+          assert(chunk.length <= 10);
+        });
+        expectData(stream, big, done);
       });
     });
 
@@ -343,11 +439,22 @@ describe('Transport', function() {
     }
 
     it('should create PUSH_PROMISE', function(done) {
-      var parent = client.request({
+      client.request({
         path: '/parent'
-      }, function(err) {
+      }, function(err, stream) {
         assert(!err);
-        parent.pushPromise({
+
+        stream.on('pushPromise', function(push) {
+          assert.equal(push.path, '/push');
+          done();
+        });
+      });
+
+      server.on('stream', function(stream) {
+        assert.equal(stream.path, '/parent');
+
+        stream.respond(200, {});
+        stream.pushPromise({
           path: '/push',
           priority: {
             parent: 0,
@@ -358,14 +465,121 @@ describe('Transport', function() {
           assert(!err);
         });
       });
+    });
+
+    it('should fail on disabled PUSH_PROMISE', function(done) {
+      client.request({
+        path: '/parent'
+      }, function(err, stream) {
+        assert(!err);
+
+        stream._spdyState.framer.enablePush(true);
+        stream.pushPromise({
+          path: '/push',
+          priority: {
+            parent: 0,
+            exclusive: false,
+            weight: 42
+          }
+        }, function(err, stream) {
+          assert(!err);
+        });
+
+        client.on('close', function(err) {
+          assert(err);
+          done();
+        });
+      });
 
       server.on('stream', function(stream) {
         assert.equal(stream.path, '/parent');
 
-        stream.on('pushPromise', function(push) {
-          assert.equal(push.path, '/push');
+        stream.respond(200, {});
+        stream.on('pushPromise', function() {
+          assert(false);
+        });
+      });
+    });
+
+    it('should get error on disabled PUSH_PROMISE', function(done) {
+      client.request({
+        path: '/parent'
+      }, function(err, stream) {
+        assert(!err);
+
+        stream.pushPromise({
+          path: '/push',
+          priority: {
+            parent: 0,
+            exclusive: false,
+            weight: 42
+          }
+        }, function(err, stream) {
+          assert(err);
           done();
         });
+      });
+
+      server.on('stream', function(stream) {
+        assert.equal(stream.path, '/parent');
+
+        stream.respond(200, {});
+
+        stream.on('pushPromise', function() {
+          assert(false);
+        });
+      });
+    });
+
+    it('should ignore request after GOAWAY', function(done) {
+      client.request({
+        path: '/hello-split'
+      }, function(err, stream) {
+        assert(!err);
+
+        client.request({
+          path: '/second'
+        }, function(err, stream) {
+        });
+      });
+
+      var once = false;
+      server.on('stream', function(stream) {
+        assert(!once);
+        once = true;
+
+        // Send GOAWAY
+        server.end();
+      });
+
+      var waiting = 2;
+      server.on('frame', function(frame) {
+        if (frame.type === 'HEADERS' && --waiting === 0)
+          setImmediate(done);
+      });
+    });
+
+    it('should emit `close` after GOAWAY', function(done) {
+      client.request({
+        path: '/hello-split'
+      }, function(err, stream) {
+        assert(!err);
+
+        stream.resume();
+        stream.end();
+      });
+
+      var once = false;
+      server.on('stream', function(stream) {
+        assert(!once);
+        once = true;
+
+        stream.respond(200, {});
+        stream.resume();
+        stream.end();
+
+        pair.destroySoon = done;
+        server.end();
       });
     });
 

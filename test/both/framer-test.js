@@ -184,6 +184,7 @@ describe('Framer', function() {
             type: 'HEADERS',
             id: 1,
             fin: false,
+            writable: true,
             priority: {
               weight: 16,
               parent: 0,
@@ -222,6 +223,7 @@ describe('Framer', function() {
             type: 'HEADERS',
             id: 1,
             fin: false,
+            writable: true,
             priority: {
               weight: 1,
               parent: 0,
@@ -258,6 +260,7 @@ describe('Framer', function() {
             type: 'HEADERS',
             id: 1,
             fin: false,
+            writable: true,
             priority: {
               weight: 16,
               parent: 0,
@@ -374,6 +377,7 @@ describe('Framer', function() {
               weight: 16
             },
             fin: false,
+            writable: true,
             path: undefined,
             headers: {
               a: 'b'
@@ -405,6 +409,7 @@ describe('Framer', function() {
             weight: 16
           },
           fin: false,
+          writable: true,
           path: undefined,
           headers: {
             a: 'b'
@@ -418,6 +423,7 @@ describe('Framer', function() {
             weight: 16
           },
           fin: false,
+          writable: true,
           path: undefined,
           headers: {
             c: 'd'
@@ -450,6 +456,7 @@ describe('Framer', function() {
               weight: 16
             },
             fin: false,
+            writable: true,
             path: undefined,
             headers: {
               a: '+++++++++++++++++++++++',
@@ -502,14 +509,14 @@ describe('Framer', function() {
       it('should generate regular frame', function(done) {
         framer.goawayFrame({
           lastId: 42,
-          code: 23
+          code: 'PROTOCOL_ERROR'
         }, function(err) {
           assert(!err);
 
           expect({
             type: 'GOAWAY',
             lastId: 42,
-            code: 23
+            code: 'PROTOCOL_ERROR'
           }, done);
         });
       });
