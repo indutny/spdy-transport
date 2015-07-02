@@ -367,7 +367,7 @@ describe('SPDY Parser', function() {
         type: 'GOAWAY'
       }, done);
     });
-  })
+  });
 
   describe('HEADERS', function() {
     // [ ]
@@ -375,8 +375,16 @@ describe('SPDY Parser', function() {
   })
 
   describe('WINDOW_UPDATE', function () {
-    // [ ]
- 
+    it('should parse frame', function(done) {
+      var hexframe = '8003000900000008000000010000abca';
+
+      pass(hexframe, {
+        delta: 43978,
+        id: 1,
+        type: 'WINDOW_UPDATE'
+      }, done);
+    });
+
   })
 
 })
