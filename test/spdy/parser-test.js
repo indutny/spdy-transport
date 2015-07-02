@@ -208,18 +208,107 @@ describe('SPDY Parser', function() {
   })
 
   describe('RST_STREAM', function() {
-    // [ ] pass with frame without flags and status code PROTOCOL_ERROR
-    // [ ] pass with frame without flags and status code INVALID_STREAM
-    // [ ] pass with frame without flags and status code REFUSED_STREAM
-    // [ ] pass with frame without flags and status code UNSUPPORTED_VERSION
-    // [ ] pass with frame without flags and status code CANCEL
-    // [ ] pass with frame without flags and status code INTERNAL_ERROR
-    // [ ] pass with frame without flags and status code FLOW_CONTROL_ERROR
-    // [ ] pass with frame without flags and status code STREAM_IN_USE
-    // [ ] pass with frame without flags and status code STREAM_ALREADY_CLOSED
-    // [ ] pass with frame without flags and status code FRAME_TOO_LARGE
-    // [ ] fail with frame without flags and status code 0 (unvalid)
-    // [ ] fail with frame with flags (there should be none)
+    it('should parse frame with status code PROTOCOL_ERROR', function(done) {
+      var hexFrame = '80030003000000080000000100000001';
+
+      pass(hexFrame, {
+        code: "PROTOCOL_ERROR",
+        id: 1,
+        type: 'RST' // RST_STREAM by spec
+      }, done);
+    });
+
+    it('should parse frame with status code INVALID_STREAM', function(done) {
+      var hexFrame = '80030003000000080000000100000002';
+
+      pass(hexFrame, {
+        code: "INVALID_STREAM",
+        id: 1,
+        type: 'RST' // RST_STREAM by spec
+      }, done);
+    });
+
+    it('should parse frame with status code REFUSED_STREAN', function(done) {
+      var hexFrame = '80030003000000080000000100000003';
+
+      pass(hexFrame, {
+        code: "REFUSED_STREAM",
+        id: 1,
+        type: 'RST' // RST_STREAM by spec
+      }, done);
+    });
+
+    it('should parse frame with status code UNSUPPORTED_VERSION', function(done) {
+      var hexFrame = '80030003000000080000000100000004';
+
+      pass(hexFrame, {
+        code: "UNSUPPORTED_VERSION",
+        id: 1,
+        type: 'RST' // RST_STREAM by spec
+      }, done);
+    });
+
+    it('should parse frame with status code CANCEL', function(done) {
+      var hexFrame = '80030003000000080000000100000005';
+
+      pass(hexFrame, {
+        code: "CANCEL",
+        id: 1,
+        type: 'RST' // RST_STREAM by spec
+      }, done);
+    });
+
+    it('should parse frame with status code INTERNAL_ERROR', function(done) {
+      var hexFrame = '80030003000000080000000100000006';
+
+      pass(hexFrame, {
+        code: "INTERNAL_ERROR",
+        id: 1,
+        type: 'RST' // RST_STREAM by spec
+      }, done);
+    });
+
+    it('should parse frame with status code FLOW_CONTROL_ERROR', function(done) {
+      var hexFrame = '80030003000000080000000100000007';
+
+      pass(hexFrame, {
+        code: "FLOW_CONTROL_ERROR",
+        id: 1,
+        type: 'RST' // RST_STREAM by spec
+      }, done);
+    });
+
+    it('should parse frame with status code STREAM_IN_USE', function(done) {
+      var hexFrame = '80030003000000080000000100000008';
+
+      pass(hexFrame, {
+        code: "STREAM_IN_USE",
+        id: 1,
+        type: 'RST' // RST_STREAM by spec
+      }, done);
+    });
+
+    it('should parse frame with status code STREAM_ALREADY_CLOSED', function(done) {
+      var hexFrame = '80030003000000080000000100000009';
+
+      pass(hexFrame, {
+        code: "STREAM_CLOSED", // STREAM_ALREADY_CLOSED by spec
+        id: 1,
+        type: 'RST' // RST_STREAM by spec
+      }, done);
+    });
+
+    it('should parse frame with status code FRAME_TOO_LARGE', function(done) {
+      var hexFrame = '8003000300000008000000010000000b';
+
+      pass(hexFrame, {
+        code: "FRAME_TOO_LARGE",
+        id: 1,
+        type: 'RST' // RST_STREAM by spec
+      }, done);
+    });
+
+
   })
 
 
