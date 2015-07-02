@@ -35,7 +35,6 @@ describe('SPDY Parser', function() {
   function fail(data, code, re, done) {
     parser.skipPreface();
     parser.write(new Buffer(data, 'hex'), function(err) {
-      console.log('err - ', err) 
       assert(err);
       assert(err instanceof transport.protocol.base.utils.ProtocolError);
       assert.equal(err.code, spdy.constants.error[code]);
@@ -71,21 +70,20 @@ describe('SPDY Parser', function() {
           parent: 0,
           weight: 1.
         },
-        type: 'HEADERS' // by spec 'SYN_STREAM'
+        type: 'HEADERS', // by spec 'SYN_STREAM'
+        writable: true
       }, done);
     })
 
-    /*
     it('should fail on stream ID 0', function(done) {
       var hexFrame =  '800300010000002c0000000000000000000078' +
                       'f9e3c6a7c202e50e507ab442a45a77d7105006' +
                       'b32a4804974d8cfa00000000ffff';
 
-      fail(hexFrame, 'FRAME_SIZE_ERROR', /ACK.*non-zero/i, done);
+      fail(hexFrame, 'PROTOCOL_ERROR', /Invalid*/i, done);
     });
-    */
 
-     it('should parse frame with http header and FIN flag', function(done) {
+    it('should parse frame with http header and FIN flag', function(done) {
       var hexFrame =  '800300010100002c0000000100000000000078' +
                       'f9e3c6a7c202e50e507ab442a45a77d7105006' +
                       'b32a4804974d8cfa00000000ffff';
@@ -103,11 +101,12 @@ describe('SPDY Parser', function() {
           parent: 0,
           weight: 1.
         },
-        type: 'HEADERS' // by spec 'SYN_STREAM'
+        type: 'HEADERS', // by spec 'SYN_STREAM'
+        writable: true
       }, done);
     })
 
-    it('should parse frame with http header and Unidirectional flag', function(done) {
+    it('should parse frame with unidirectional flag', function(done) {
       var hexFrame =  '800300010200002c0000000100000000000078' +
                       'f9e3c6a7c202e50e507ab442a45a77d7105006' +
                       'b32a4804974d8cfa00000000ffff';
@@ -125,7 +124,8 @@ describe('SPDY Parser', function() {
           parent: 0,
           weight: 1.
         },
-        type: 'HEADERS' // by spec 'SYN_STREAM'
+        type: 'HEADERS', // by spec 'SYN_STREAM'
+        writable: false
       }, done);
     })
 
@@ -151,7 +151,8 @@ describe('SPDY Parser', function() {
           parent: 0,
           weight: 16
         },
-        type: 'HEADERS' // by spec SYN_REPLY
+        type: 'HEADERS', // by spec SYN_REPLY
+        writable: true
       } , done);
     })
   })
