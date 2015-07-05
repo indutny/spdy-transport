@@ -383,17 +383,51 @@ describe('SPDY Parser', function() {
     });
   });
 
-  /*
   describe('HEADERS', function() {
     it('should parse frame', function(done) {
-      var hexframe = '800300080000002500000001001700e8ff00000001000000046d6f72650000000768656164657273000000ffff'
+      var context = '8003000200000057000000013830e3c6a7c2004300bcff00000003' +
+                '000000057468657265000000057468657265000000073a737461747573' +
+                '00000006323030204f4b000000083a76657273696f6e00000008485454' +
+                     '502f312e31000000ffff'
 
-      pass(hexframe, {
-        type: 'HEADERS'
-      }, done);
+      var frame = '800300080000002500000001001700e8ff00000001000000046d6f7265' +
+                     '0000000768656164657273000000ffff'
+
+      pass(context, {
+        fin: false,
+        headers: {
+          ':status': '200',
+          there: 'there'
+        },
+        id: 1,
+        path: undefined,
+        priority: {
+          exclusive: false,
+          parent: 0,
+          weight: 16
+        },
+        type: 'HEADERS',
+        writable: true
+      }, function() {
+
+        pass(frame, {
+          fin: false,
+          headers: {
+            more: 'headers'
+          },
+          id: 1,
+          path: undefined,
+          priority: {
+            exclusive: false,
+            parent: 0,
+            weight: 16
+          },
+          type: 'HEADERS',
+          writable: true
+        }, done)
+      });
     });
   });
-  */
 
   describe('WINDOW_UPDATE', function () {
     it('should parse frame', function(done) {
