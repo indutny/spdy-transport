@@ -116,7 +116,6 @@ describe('SPDY Parser', function() {
         writable: false
       }, done);
     });
-
   });
 
   describe('SYN_REPLY', function() {
@@ -179,7 +178,6 @@ describe('SPDY Parser', function() {
         writable: true
       } , done);
     });
-
   });
 
   describe('DATA_FRAME', function() {
@@ -204,7 +202,6 @@ describe('SPDY Parser', function() {
         type: 'DATA'
       }, done);
     });
-
   });
 
   describe('RST_STREAM', function() {
@@ -439,7 +436,5 @@ describe('SPDY Parser', function() {
         type: 'WINDOW_UPDATE'
       }, done);
     });
-
   });
-
 });
