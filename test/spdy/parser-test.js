@@ -61,7 +61,7 @@ describe('SPDY Parser', function() {
         type: 'HEADERS', // by spec 'SYN_STREAM'
         writable: true
       }, done);
-    })
+    });
 
     it('should fail on stream ID 0', function(done) {
       var hexFrame =  '800300010000002c0000000000000000000078' +
@@ -92,7 +92,7 @@ describe('SPDY Parser', function() {
         type: 'HEADERS', // by spec 'SYN_STREAM'
         writable: true
       }, done);
-    })
+    });
 
     it('should parse frame with unidirectional flag', function(done) {
       var hexFrame =  '800300010200002c0000000100000000000078' +
@@ -115,7 +115,7 @@ describe('SPDY Parser', function() {
         type: 'HEADERS', // by spec 'SYN_STREAM'
         writable: false
       }, done);
-    })
+    });
 
   });
 
@@ -136,7 +136,7 @@ describe('SPDY Parser', function() {
         type: 'HEADERS', // by spec SYN_REPLY
         writable: true
       } , done);
-    })
+    });
 
     it('should parse a frame with headers', function(done) {
       var hexFrame = '8003000200000057000000013830e3c6a7c2004300bcff' +
@@ -160,7 +160,7 @@ describe('SPDY Parser', function() {
         type: 'HEADERS', // by spec SYN_REPLY
         writable: true
       } , done);
-    })
+    });
 
     it('should parse frame with FIN_FLAG', function(done) {
       var hexFrame = '80030002010000140000000178f9e3c6a7c202a6230600000000ffff'
@@ -178,9 +178,9 @@ describe('SPDY Parser', function() {
         type: 'HEADERS', // by spec SYN_REPLY
         writable: true
       } , done);
-    })
+    });
 
-  })
+  });
 
   describe('DATA_FRAME', function() {
     it('should parse frame with no flags', function(done) {
@@ -192,7 +192,7 @@ describe('SPDY Parser', function() {
         id: 1,
         type: 'DATA'
       }, done);
-    })
+    });
 
     it('should parse frame with FLAG_FIN', function(done) {
       var hexFrame = '000000010100001157726974696e6720746f2073747265616d'
@@ -203,9 +203,9 @@ describe('SPDY Parser', function() {
         id: 1,
         type: 'DATA'
       }, done);
-    })
+    });
 
-  })
+  });
 
   describe('RST_STREAM', function() {
     it('should parse w/ status code PROTOCOL_ERROR', function(done) {
@@ -322,8 +322,8 @@ describe('SPDY Parser', function() {
         },
         type: 'SETTINGS'
       }, done);
-    })
-  })
+    });
+  });
 
   describe('PING', function() {
     it('should parse ACK frame', function(done) {
@@ -334,8 +334,8 @@ describe('SPDY Parser', function() {
         opaque: new Buffer('00000001', 'hex'),
         type: 'PING'
       }, done);
-    })
-  })
+    });
+  });
 
   describe('PING', function() {
     it('should parse not ACK frame', function(done) {
@@ -346,8 +346,8 @@ describe('SPDY Parser', function() {
         opaque: new Buffer('00000002', 'hex'),
         type: 'PING'
       }, done);
-    })
-  })
+    });
+  });
 
 
 
