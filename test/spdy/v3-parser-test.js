@@ -11,16 +11,13 @@ describe('SPDY Parser', function() {
     parser = spdy.parser.create({});
     var comp = pool.get('3.1');
     parser.setCompression(comp);
+    parser.skipPreface();
   });
 
   function pass(data, expected, done) {
-    parser.skipPreface();
-    parser.write(new Buffer(data, 'hex'), function (err) {
-      if (err) { console.log('Should not err -> ', err) }
-    });
+    parser.write(new Buffer(data, 'hex'));
 
     parser.once('data', function(frame) {
-      // console.log('THE FRAME \n', frame)
       assert.deepEqual(frame, expected);
       assert.equal(parser.buffer.size, 0);
       done();
@@ -28,7 +25,6 @@ describe('SPDY Parser', function() {
   }
 
   function fail(data, code, re, done) {
-    parser.skipPreface();
     parser.write(new Buffer(data, 'hex'), function(err) {
       assert(err);
       assert(err instanceof transport.protocol.base.utils.ProtocolError);
