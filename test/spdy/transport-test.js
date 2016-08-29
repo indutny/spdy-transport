@@ -140,10 +140,13 @@ describe('SPDY Transport', function() {
         setTimeout(function() {
           // Resolve backpressure
           pair.write = write;
-        }, 100);
+          pair.emit('drain');
+          setTimeout(function() {
+            stream.end(buf)
+          }, 10);
+        }, 300);
 
         stream.write(buf);
-        stream.end(buf);
       });
 
       server.on('stream', function(stream) {
