@@ -93,4 +93,75 @@ describe('SPDY Transport', function() {
       });
     });
   });
+
+  describe('backpressure', function() {
+    it('should resume after pressure is released', function(done) {
+
+      var pair = streamPair.create();
+
+      server = transport.connection.create(pair, {
+        protocol: 'spdy',
+        windowSize: 256,
+        isServer: true,
+        autoSpdy31: true
+      });
+
+      client = transport.connection.create(pair.other, {
+        protocol: 'spdy',
+        windowSize: 256,
+        isServer: false,
+        autoSpdy31: true
+      });
+
+      server.start(3.1);
+
+      client.start(3.1);
+
+      var buf = new Buffer(64 * 1024);
+      buf.fill('x');
+
+      client.request({
+        method: 'POST',
+        path: '/',
+        headers: {}
+      }, function(err, stream) {
+        assert(!err);
+
+        stream.write(buf);
+        stream.write(buf);
+
+        const write = pair.write.bind(pair)
+        pair.write = function(data, enc, cb) {
+          write(data, enc, cb);
+          // Simulate backpressure on the socket
+          return false;
+        }
+
+        setTimeout(function() {
+          // Resolve backpressure
+          pair.write = write;
+          pair.emit('drain');
+          setTimeout(function() {
+            stream.end(buf)
+          }, 10);
+        }, 300);
+
+        stream.write(buf);
+      });
+
+      server.on('stream', function(stream) {
+        stream.respond(200, {});
+
+        var received = 0;
+        stream.on('data', function(chunk) {
+          received += chunk.length;
+        });
+
+        stream.on('end', function() {
+          assert.equal(received, buf.length * 4);
+          done();
+        });
+      });
+    });
+  });
 });
