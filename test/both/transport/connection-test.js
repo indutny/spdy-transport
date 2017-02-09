@@ -294,6 +294,30 @@ describe('Transport/Connection', function () {
       })
     })
 
+    it('should ignore WINDOW_UPDATE frame after END_STREAM', function (done) {
+      client.request({
+        path: '/hello'
+      }, function (err, stream) {
+        assert(!err)
+
+        stream.resume()
+
+        stream.once('close', function () {
+          client.on('frame', function (frame) {
+            assert(!(frame.type === 'RST' && frame.id === 1))
+          })
+
+          client._spdyState.framer.windowUpdateFrame({
+            id: stream.id,
+            delta: 1
+          }, function (err) {
+            assert(!err)
+            setTimeout(done, 100)
+          })
+        })
+      })
+    })
+
     it('should use last received id when killing streams', function (done) {
       var waiting = 2
       function next () {
