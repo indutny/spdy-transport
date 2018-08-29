@@ -376,7 +376,7 @@ describe('Transport/Stream', function () {
         stream.respond(200, {})
 
         stream.resume()
-        stream.on('data', (data) => {
+        stream.on('data', function (data) {
           dataReceived = true
         })
         stream.on('headers', function (headers) {
