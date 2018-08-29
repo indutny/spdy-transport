@@ -349,7 +349,7 @@ describe('Transport/Stream', function () {
     })
 
     it('should emit trailing headers', function (done) {
-      let dataReceived = false
+      var dataReceived = false
       client.request({
         method: 'POST',
         path: '/hello-split'
