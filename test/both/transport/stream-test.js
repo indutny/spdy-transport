@@ -122,7 +122,6 @@ describe('Transport/Stream', function () {
         stream.sendHeaders({ a: 'b' })
         stream.end()
       })
-
       server.on('stream', function (stream) {
         var gotHeaders = false
         stream.on('headers', function (headers) {
@@ -350,6 +349,7 @@ describe('Transport/Stream', function () {
     })
 
     it('should emit trailing headers', function (done) {
+      var dataReceived = false
       client.request({
         method: 'POST',
         path: '/hello-split'
@@ -364,11 +364,25 @@ describe('Transport/Stream', function () {
         })
       })
 
+      if (name === 'h2') {
+        server.on('frame', function (frame) {
+          if (frame.type === 'HEADERS' && dataReceived) {
+            assert.ok(frame.fin)
+          }
+        })
+      }
+
       server.on('stream', function (stream) {
         stream.respond(200, {})
 
         stream.resume()
+        stream.on('data', function (data) {
+          dataReceived = true
+        })
         stream.on('headers', function (headers) {
+          if (name === 'h2') {
+            assert.ok(dataReceived)
+          }
           assert.equal(headers.trailer, 'yes')
           done()
         })
